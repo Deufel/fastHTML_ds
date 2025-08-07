@@ -1,0 +1,92 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "fastHTML_ds",
+    "section": "",
+    "text": "This file will become your README and also the index of your documentation.",
+    "crumbs": [
+      "fastHTML_ds"
+    ]
+  },
+  {
+    "objectID": "index.html#developer-guide",
+    "href": "index.html#developer-guide",
+    "title": "fastHTML_ds",
+    "section": "Developer Guide",
+    "text": "Developer Guide\nIf you are new to using nbdev here are some useful pointers to get you started.\n\nInstall fastHTML_ds in Development mode\n# make sure fastHTML_ds package is installed in development mode\n$ pip install -e .\n\n# make changes under nbs/ directory\n# ...\n\n# compile to have changes apply to fastHTML_ds\n$ nbdev_prepare",
+    "crumbs": [
+      "fastHTML_ds"
+    ]
+  },
+  {
+    "objectID": "index.html#usage",
+    "href": "index.html#usage",
+    "title": "fastHTML_ds",
+    "section": "Usage",
+    "text": "Usage\n\nFastHTML + Datastar Integration *\n\n⚠️ Alpha Software: This is experimental and APIs may change significantly.\n\nInstallation\nInstall latest from the GitHub repository:\n$ pip install git+https://github.com/Deufel/fastHTML_ds.git\nor from conda\n$ conda install -c Deufel fastHTML_ds\nor from pypi\n$ pip install fastHTML_ds\n\n\nDocumentation\nDocumentation can be found hosted on this GitHub repository’s pages. Additionally you can find package manager specific guidelines on conda and pypi respectively.",
+    "crumbs": [
+      "fastHTML_ds"
+    ]
+  },
+  {
+    "objectID": "index.html#how-to-use",
+    "href": "index.html#how-to-use",
+    "title": "fastHTML_ds",
+    "section": "How to use",
+    "text": "How to use\n\n\n\n2",
+    "crumbs": [
+      "fastHTML_ds"
+    ]
+  },
+  {
+    "objectID": "core.html",
+    "href": "core.html",
+    "title": "core",
+    "section": "",
+    "text": "The core of the Datastar integration involves replacing FastHTML’s response processing to generate Server-Sent Events (SSE) instead of traditional HTML responses.\nThis function processes FastHTML responses but removes HTMX-specific headers that aren’t needed for Datastar:\n\nfrom fasthtml.common import *\nfrom starlette.testclient import TestClient\n\n\n# Test with actual FastHTML app and TestClient\napp = FastHTML()\n\n@app.get(\"/test-headers\")\ndef test_headers():\n    return Div(\"Content\"), HttpHeader(\"X-Custom\", \"test-value\")\n\nclient = TestClient(app)\nresponse = client.get(\"/test-headers\")\nassert response.headers[\"X-Custom\"] == \"test-value\"\n\n\n# Test fragment vs full page detection\napp = FastHTML(title=\"Test App\")\n\n\n@app.get(\"/fragment\")\ndef fragment():\n    return Div(id=\"content\")(\"Fragment content\")\n\n\nclient = TestClient(app)\n\nRegular request gets full page\n\nresponse = client.get(\"/fragment\")\nassert \"&lt;title&gt;Test App&lt;/title&gt;\" in response.text\nassert \"&lt;div id=\\\"content\\\"&gt;Fragment content&lt;/div&gt;\" in response.text\n\nDatastar request gets fragment only\n\nresponse = client.get(\"/fragment?datastar=true\")\n# This would be just the fragment in a real implementation\n\nTest JSON responses become signals\n\napp = FastHTML()\n\n@app.get(\"/signals\")\ndef signals():\n    return {\"counter\": 42, \"message\": \"hello\"}\n\nclient = TestClient(app)\nresponse = client.get(\"/signals\")\nassert response.json() == {\"counter\": 42, \"message\": \"hello\"}",
+    "crumbs": [
+      "core"
+    ]
+  },
+  {
+    "objectID": "core.html#response-processing",
+    "href": "core.html#response-processing",
+    "title": "core",
+    "section": "",
+    "text": "The core of the Datastar integration involves replacing FastHTML’s response processing to generate Server-Sent Events (SSE) instead of traditional HTML responses.\nThis function processes FastHTML responses but removes HTMX-specific headers that aren’t needed for Datastar:\n\nfrom fasthtml.common import *\nfrom starlette.testclient import TestClient\n\n\n# Test with actual FastHTML app and TestClient\napp = FastHTML()\n\n@app.get(\"/test-headers\")\ndef test_headers():\n    return Div(\"Content\"), HttpHeader(\"X-Custom\", \"test-value\")\n\nclient = TestClient(app)\nresponse = client.get(\"/test-headers\")\nassert response.headers[\"X-Custom\"] == \"test-value\"\n\n\n# Test fragment vs full page detection\napp = FastHTML(title=\"Test App\")\n\n\n@app.get(\"/fragment\")\ndef fragment():\n    return Div(id=\"content\")(\"Fragment content\")\n\n\nclient = TestClient(app)\n\nRegular request gets full page\n\nresponse = client.get(\"/fragment\")\nassert \"&lt;title&gt;Test App&lt;/title&gt;\" in response.text\nassert \"&lt;div id=\\\"content\\\"&gt;Fragment content&lt;/div&gt;\" in response.text\n\nDatastar request gets fragment only\n\nresponse = client.get(\"/fragment?datastar=true\")\n# This would be just the fragment in a real implementation\n\nTest JSON responses become signals\n\napp = FastHTML()\n\n@app.get(\"/signals\")\ndef signals():\n    return {\"counter\": 42, \"message\": \"hello\"}\n\nclient = TestClient(app)\nresponse = client.get(\"/signals\")\nassert response.json() == {\"counter\": 42, \"message\": \"hello\"}",
+    "crumbs": [
+      "core"
+    ]
+  },
+  {
+    "objectID": "core.html#route-enhancement",
+    "href": "core.html#route-enhancement",
+    "title": "core",
+    "section": "Route Enhancement",
+    "text": "Route Enhancement\n\nsource\n\nFastHTML.route\n\n FastHTML.route (path:str=None, methods=None, name=None,\n                 include_in_schema=True, body_wrap=None, patch_mode=None,\n                 selector=None, use_view_transition=False)\n\nEnhanced route decorator with server-driven Datastar patch options\nUpdate HTTP method shortcuts\n\nfor method in all_meths:\n    setattr(FastHTML, method, partialmethod(FastHTML.route, methods=method))\n\n\n# Test route with patch options\napp = FastHTML()\n\n@app.get(\"/append-item\", patch_mode=\"append\", selector=\"#list\")\ndef append_item():\n    return Li(\"New item\")\n\n# Verify the function has Datastar attributes\nassert hasattr(append_item, '_datastar_mode')\nassert append_item._datastar_mode == \"append\"\nassert append_item._datastar_selector == \"#list\"",
+    "crumbs": [
+      "core"
+    ]
+  },
+  {
+    "objectID": "core.html#endpoint-processing",
+    "href": "core.html#endpoint-processing",
+    "title": "core",
+    "section": "Endpoint Processing",
+    "text": "Endpoint Processing",
+    "crumbs": [
+      "core"
+    ]
+  },
+  {
+    "objectID": "core.html#monkey-patch-application",
+    "href": "core.html#monkey-patch-application",
+    "title": "core",
+    "section": "Monkey Patch Application",
+    "text": "Monkey Patch Application",
+    "crumbs": [
+      "core"
+    ]
+  }
+]
