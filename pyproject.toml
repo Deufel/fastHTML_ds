@@ -1,0 +1,15 @@
+[project]
+name="fastHTML_ds"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python=">=3.9"
+dependencies = [
+    "python-fasthtml>=0.12.23",
+]
+
+[dependency-groups]
+dev = [
+    "jupyterlab>=4.4.5",
+    "nbdev>=2.4.5",
+]

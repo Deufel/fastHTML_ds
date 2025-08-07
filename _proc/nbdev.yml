@@ -1,0 +1,9 @@
+project:
+  output-dir: _docs
+
+website:
+  title: "fastHTML_ds"
+  site-url: "https://Deufel.github.io/fastHTML_ds"
+  description: "datastar modification to the fastHTML library"
+  repo-branch: master
+  repo-url: "https://github.com/Deufel/fastHTML_ds"
